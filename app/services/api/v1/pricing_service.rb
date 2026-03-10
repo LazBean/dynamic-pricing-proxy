@@ -9,6 +9,8 @@ module Api::V1
     ALL_COMBINATIONS = VALID_PERIODS.product(VALID_HOTELS, VALID_ROOMS)
                                     .map { |p, h, r| { period: p, hotel: h, room: r } }.freeze
 
+    FETCH_MUTEX = Mutex.new
+
     attr_reader :error_status
 
     def initialize(period:, hotel:, room:)
@@ -27,8 +29,15 @@ module Api::V1
         return
       end
 
-      Rails.logger.info("[pricing] cache=miss period=#{@period} hotel=#{@hotel} room=#{@room} — fetching all combinations")
-      fetch_and_cache_all
+      FETCH_MUTEX.synchronize do
+        # Re-check after acquiring lock — another thread may have already fetched
+        if Rails.cache.read(cache_key)
+          Rails.logger.info("[pricing] cache=hit period=#{@period} hotel=#{@hotel} room=#{@room} (post-lock)")
+        else
+          Rails.logger.info("[pricing] cache=miss period=#{@period} hotel=#{@hotel} room=#{@room} — fetching all combinations")
+          fetch_and_cache_all
+        end
+      end
       return unless valid?
 
       @result = Rails.cache.read(cache_key)
