@@ -6,15 +6,10 @@ class RateApiClient
   default_timeout 10
 
   def self.get_rate(period:, hotel:, room:)
-    params = {
-      attributes: [
-        {
-          period: period,
-          hotel: hotel,
-          room: room
-        }
-      ]
-    }.to_json
-    self.post("/pricing", body: params)
+    get_rates([{ period: period, hotel: hotel, room: room }])
+  end
+
+  def self.get_rates(attributes)
+    self.post("/pricing", body: { attributes: attributes }.to_json)
   end
 end
