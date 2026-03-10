@@ -1,6 +1,6 @@
 # Dynamic Pricing Proxy
 
-A Rails service that sits in front of a dynamic pricing model API and caches results to stay within its usage limits.
+A Rails service that sits in front of a dynamic pricing model API ([tripladev/rate-api](https://hub.docker.com/r/tripladev/rate-api)) and caches results to stay within its usage limits.
 
 ## Quick Start
 
