@@ -29,8 +29,9 @@ module Api::V1
 
       Rails.logger.info("[pricing] cache=miss period=#{@period} hotel=#{@hotel} room=#{@room} — fetching all combinations")
       fetch_and_cache_all
-      @result = Rails.cache.read(cache_key)
+      return unless valid?
 
+      @result = Rails.cache.read(cache_key)
       if @result.nil?
         @error_status = :bad_gateway
         errors << 'Rate not found in upstream response'
